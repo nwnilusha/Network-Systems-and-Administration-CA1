@@ -20,7 +20,7 @@ How this works : Instructions to work with this in Ubuntu machine
 
 4. Get the target machine IP address and update the inventory.ini file with that IP address and its username and password.(ansible_host= ansible_user= ansible_password=)
 
-5. Execute the ansible playbook script with below command.
+5. Execute the ansible playbook script with below command. --ask-pass(enter target machine password) and --ask-become-pass(enable the docker execution admin rights)
 
 ansible-playbook -i inventory.ini docker_deploy.yml --ask-pass --ask-become-pass
 
