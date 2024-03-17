@@ -1,0 +1,63 @@
+- name: Deploy Apache Docker Containers
+  hosts: docker_hosts 
+  become: true
+
+  tasks:
+    - name: Remove conflicting containerd.io package
+      apt:
+        name: containerd.io
+        state: absent
+      become: true
+
+    - name: Update package dependencies
+      apt:
+        update_cache: yes
+      become: true
+
+    - name: Install Docker.io packages
+      package:
+        name: docker.io
+        state: present
+      become: true
+
+    - name: Install the Docker Python module and dependencies
+      pip:
+        name: docker
+
+    - name: Create temp nilusha directory
+      ansible.builtin.file:
+        path: /tmp/nilusha
+        state: directory
+
+    - name: Copy files to temp nilusha
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/public-html"
+        dest: "/tmp/nilusha"
+        
+    - name: Create Docker network with user-defined subnet
+      docker_network:
+        name: my-network
+        ipam_config:
+          - subnet: "172.168.10.0/30"
+
+    - name: Define list of container configurations
+      set_fact:
+        container_configs:
+          - name: docker-container-01
+            image: httpd:latest
+            ports:
+              - "8080:80"
+            volumes:
+              - "/tmp/nilusha:/usr/local/apache2/htdocs"
+            networks:
+              - name: my-network
+                ipv4_address: 172.168.10.2
+
+    - name: Create Docker containers
+      docker_container:
+        name: "{{ item.name }}"
+        image: "{{ item.image }}"
+        ports: "{{ item.ports }}"
+        volumes: "{{ item.volumes }}"
+        networks: "{{ item.networks }}"
+      loop: "{{ container_configs }}"
