@@ -31,7 +31,7 @@
 
     - name: Copy files to temp nilusha
       ansible.builtin.copy:
-        src: "{{ playbook_dir }}/public-html"
+        src: "{{ playbook_dir }}/public_html"
         dest: "/tmp/nilusha"
         
     - name: Create Docker network with user-defined subnet
